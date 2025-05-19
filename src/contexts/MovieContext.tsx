@@ -18,11 +18,26 @@ export const useMovieContext = () => {
 };
 
 function MovieProvider({ children }: { children: React.ReactNode }) {
-  const [favorites, setFavorites] = useState<Movie[]>([]);
+  const [favorites, setFavorites] = useState<Movie[]>(() => {
+    try {
+      const stored = localStorage.getItem("favorites");
+      return stored ? JSON.parse(stored) : [];
+    } catch {
+      return [];
+    }
+  });
 
   useEffect(() => {
-    const storedFavorites = localStorage.getItem("favorite");
-    if (storedFavorites) setFavorites(JSON.parse(storedFavorites));
+    try {
+      const storedFavorites = localStorage.getItem("favorites");
+      if (storedFavorites) {
+        const parsed = JSON.parse(storedFavorites);
+        setFavorites(parsed);
+      }
+    } catch (error) {
+      console.error("Failed to parse favorites:", error);
+      localStorage.removeItem("favorites");
+    }
   }, []);
 
   useEffect(() => {
